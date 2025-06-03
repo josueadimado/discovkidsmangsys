@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <div class="px-3 px-md-4 pt-4 pt-md-5 d-flex justify-content-between align-items-center mb-4 mb-md-5 flex-wrap gap-3">
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-person-fill me-2"></i>Student Information: {{ student.first_name }} {{ student.last_name }}
+        </h2>
+        <a href="{% url 'kindergarten:student_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Student List
+        </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="px-3 px-md-4 mb-4">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm border-0 rounded-4 mx-3 mx-md-4 mb-5 animate-card">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <p><strong>Student ID:</strong> {{ student.student_id }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Group:</strong> {{ student.get_group_display }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>First Name:</strong> {{ student.first_name }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Last Name:</strong> {{ student.last_name }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Father's Name:</strong> {{ student.father_name }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Mother's Name:</strong> {{ student.mother_name }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Parent Contact:</strong> {{ student.parent_contact }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Parent Email:</strong> {{ student.parent_email }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Date of Admission:</strong> {% if student.date_of_admission %}{{ student.date_of_admission|date:"Y-m-d" }}{% else %}Not Set{% endif %}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Fee:</strong> {{ student.fee }} RUB</p>
+            </div>
+            <div class="col-md-12">
+                <p><strong>Picture:</strong>
+                    {% if student.picture %}
+                        <a href="{{ student.picture.url }}" target="_blank" class="text-decoration-none">View Picture</a>
+                    {% else %}
+                        <span class="text-muted">No picture uploaded</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-12">
+                <p><strong>Extra Classes:</strong>
+                    {% for extra_class in student.extra_classes.all %}
+                        {{ extra_class.name }} ({{ extra_class.price }} RUB per session){% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        <span class="text-muted">None</span>
+                    {% endfor %}
+                </p>
+            </div>
+            <div class="col-md-12">
+                <p><strong>Total Extra Class Fee (May 2025):</strong> {{ student.total_extra_class_fee|floatformat:2 }} RUB</p>
+            </div>
+            <div class="col-md-12">
+                <p><strong>Total Amount Due (May 2025):</strong> {{ student.total_amount_due|floatformat:2 }} RUB</p>
+            </div>
+            <!-- Allergy Information -->
+            <div class="col-md-12">
+                <p><strong>Has Allergy:</strong> {{ student.has_allergy|yesno:"Yes,No" }}</p>
+            </div>
+            {% if student.has_allergy %}
+            <div class="col-md-12">
+                <p><strong>Allergy Details:</strong> {{ student.allergy_details|default:"Not specified" }}</p>
+            </div>
+            {% endif %}
+            <!-- Date of Completion -->
+            <div class="col-md-12">
+                <p><strong>Date of Completion:</strong> {% if student.date_of_completion %}{{ student.date_of_completion|date:"Y-m-d" }}{% else %}Not Set{% endif %}</p>
+            </div>
+            <div class="col-md-12">
+                <p><strong>Status:</strong>
+                    <span class="badge rounded-pill {% if student.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ student.is_active|yesno:"Active,Inactive" }}
+                    </span>
+                    {% if student.date_of_completion and not student.is_active %}
+                        <small class="text-muted">(Graduated on {{ student.date_of_completion|date:"Y-m-d" }})</small>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra Class Sessions Section -->
+    <div class="card shadow-sm border-0 rounded-4 mx-3 mx-md-4 mb-5 animate-card">
+        <h3 class="fw-bold mb-4">
+            <i class="bi bi-list-ul me-2"></i>Log Extra Class Sessions
+        </h3>
+
+        <!-- Single Session Form -->
+        <h4 class="fw-bold mb-3">Log a Single Session</h4>
+        <form method="post" class="mb-5" name="single_session">
+            {% csrf_token %}
+            <input type="hidden" name="single_session" value="1">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <label for="{{ single_form.extra_class.id_for_label }}" class="form-label fw-bold">Extra Class</label>
+                    {{ single_form.extra_class }}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ single_form.session_date.id_for_label }}" class="form-label fw-bold">Session Date</label>
+                    {{ single_form.session_date }}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ single_form.session_count.id_for_label }}" class="form-label fw-bold">Session Count</label>
+                    {{ single_form.session_count }}
+                </div>
+            </div>
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-lg btn-primary">
+                    Log Session
+                </button>
+            </div>
+        </form>
+
+        <!-- Bulk Session Form -->
+        <h4 class="fw-bold mb-3">Log Sessions for a Month</h4>
+        {% if bulk_form_errors %}
+        <div class="alert alert-danger alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Form Errors:</strong>
+            <ul>
+                {% for field, errors in bulk_form_errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        <form method="post" class="mb-5" name="bulk_session">
+            {% csrf_token %}
+            <input type="hidden" name="bulk_session" value="1">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label for="{{ bulk_form.month.id_for_label }}" class="form-label fw-bold">Month</label>
+                    {{ bulk_form.month }}
+                    {% if bulk_form.month.errors %}
+                        <div class="text-danger">{{ bulk_form.month.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ bulk_form.year.id_for_label }}" class="form-label fw-bold">Year</label>
+                    {{ bulk_form.year }}
+                    {% if bulk_form.year.errors %}
+                        <div class="text-danger">{{ bulk_form.year.errors }}</div>
+                    {% endif %}
+                </div>
+                {% for field in dynamic_fields %}
+                <div class="col-md-6">
+                    <label for="id_{{ field.field_name }}" class="form-label fw-bold">
+                        Sessions per Week for {{ field.extra_class.name }}
+                    </label>
+                    {{ field.field_html|safe }}
+                    {% if field.errors %}
+                        <div class="text-danger">
+                            {{ field.errors|safe }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="col-md-12">
+                    <p class="text-muted">No extra classes enrolled for this student. Please enroll the student in extra classes to log sessions.</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-lg btn-primary">
+                    Log Monthly Sessions
+                </button>
+            </div>
+        </form>
+
+        <!-- List of Existing Sessions -->
+        <h4 class="fw-bold mb-3">Existing Sessions</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-start">Extra Class</th>
+                        <th scope="col">Session Date</th>
+                        <th scope="col">Session Count</th>
+                        <th scope="col">Total Fee (RUB)</th>
+                        <th scope="col" class="rounded-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in sessions_with_fees %}
+                    <tr>
+                        <td>{{ entry.session.extra_class.name }}</td>
+                        <td>{{ entry.session.session_date|date:"Y-m-d" }}</td>
+                        <td>{{ entry.session.session_count }}</td>
+                        <td>
+                            {{ entry.session.extra_class.price|floatformat:2 }} * {{ entry.session.session_count }} = {{ entry.total_fee|floatformat:2 }} RUB
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'kindergarten:edit_extra_class_session' student.student_id entry.session.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil-fill me-1"></i>Edit
+                                </a>
+                                <a href="{% url 'kindergarten:delete_extra_class_session' student.student_id entry.session.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash-fill me-1"></i>Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-emoji-frown display-6 d-block mb-2"></i>
+                            No sessions logged for this student.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-5" style="color: var(--primary-color);">
+        <i class="bi bi-plus-circle-fill me-2"></i>Add Extra Class
+    </h2>
+
+    <div class="card shadow-sm border-0 rounded-4 p-5">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label for="{{ form.name.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.price.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Price (RUB)</label>
+                    {{ form.price }}
+                </div>
+            </div>
+            <div class="text-end mt-4">
+                <a href="{% url 'extra_class_list' %}" class="btn btn-lg shadow-sm rounded me-3" style="background-color: var(--secondary-color); border-color: var(--secondary-color); color: var(--text-light);">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-lg shadow-sm rounded" style="background-color: var(--primary-color); border-color: var(--primary-color); color: var(--text-light);">
+                    Add Extra Class
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

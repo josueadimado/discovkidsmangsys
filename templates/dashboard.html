@@ -1,0 +1,485 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <!-- Dashboard Header -->
+    <div class="px-3 px-md-4 pt-4 pt-md-5 d-flex justify-content-between align-items-center mb-4 mb-md-5 flex-wrap gap-3">
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-house-door-fill me-2"></i>Dashboard
+        </h2>
+        <div class="d-flex align-items-center gap-2 gap-md-3 flex-wrap">
+            <a href="{% url 'kindergarten:admit_student' %}" class="btn btn-sm btn-primary">
+                <i class="bi bi-person-plus-fill me-2"></i>Add Student
+            </a>
+            <a href="{% url 'kindergarten:payment_list' %}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-cash me-2"></i>View Payments
+            </a>
+        </div>
+    </div>
+
+    <!-- Period Filter Form -->
+    <div class="px-3 px-md-4 mb-4">
+        <div class="card filter-card">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Select Period for Metrics</h5>
+                <form method="get" id="period-filter-form" class="row g-3 align-items-center">
+                    <!-- Period Type Selection -->
+                    <div class="col-auto">
+                        <label for="period_type" class="form-label fw-bold">Period Type</label>
+                        <select id="period_type" name="period_type" class="form-select modern-input">
+                            <option value="current_month" {% if period_type == 'current_month' %}selected{% endif %}>Current Month</option>
+                            <option value="month" {% if period_type == 'month' %}selected{% endif %}>Specific Month</option>
+                            <option value="quarter" {% if period_type == 'quarter' %}selected{% endif %}>Quarterly</option>
+                            <option value="year" {% if period_type == 'year' %}selected{% endif %}>Yearly</option>
+                            <option value="custom" {% if period_type == 'custom' %}selected{% endif %}>Custom Date Range</option>
+                        </select>
+                    </div>
+                    <!-- Specific Month Selection -->
+                    <div class="col-auto filter-subgroup" id="month-selection" style="display: {% if period_type == 'month' %}flex{% else %}none{% endif %};">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <label for="month" class="form-label fw-bold">Month</label>
+                                <select id="month" name="month" class="form-select modern-input">
+                                    {% for month_num in "1 2 3 4 5 6 7 8 9 10 11 12" %}
+                                    {% with month_num_int=month_num|add:"0" %}
+                                    <option value="{{ month_num_int }}" {% if selected_month == month_num_int|stringformat:"s" %}selected{% endif %}>
+                                        {{ month_num_int|stringformat:"02d" }}
+                                    </option>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="year_month" class="form-label fw-bold">Year</label>
+                                <select id="year_month" name="year" class="form-select modern-input">
+                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
+                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="align-self-end">
+                                <button type="submit" class="btn btn-primary modern-btn">
+                                    <i class="bi bi-filter me-1"></i>Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Quarterly Selection -->
+                    <div class="col-auto filter-subgroup" id="quarter-selection" style="display: {% if period_type == 'quarter' %}flex{% else %}none{% endif %};">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <label for="quarter" class="form-label fw-bold">Quarter</label>
+                                <select id="quarter" name="quarter" class="form-select modern-input">
+                                    <option value="1" {% if selected_quarter == '1' %}selected{% endif %}>Q1 (Jan-Mar)</option>
+                                    <option value="2" {% if selected_quarter == '2' %}selected{% endif %}>Q2 (Apr-Jun)</option>
+                                    <option value="3" {% if selected_quarter == '3' %}selected{% endif %}>Q3 (Jul-Sep)</option>
+                                    <option value="4" {% if selected_quarter == '4' %}selected{% endif %}>Q4 (Oct-Dec)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="year_quarter" class="form-label fw-bold">Year</label>
+                                <select id="year_quarter" name="year" class="form-select modern-input">
+                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
+                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="align-self-end">
+                                <button type="submit" class="btn btn-primary modern-btn">
+                                    <i class="bi bi-filter me-1"></i>Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Yearly Selection -->
+                    <div class="col-auto filter-subgroup" id="year-selection" style="display: {% if period_type == 'year' %}flex{% else %}none{% endif %};">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <label for="year" class="form-label fw-bold">Year</label>
+                                <select id="year" name="year" class="form-select modern-input">
+                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
+                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="align-self-end">
+                                <button type="submit" class="btn btn-primary modern-btn">
+                                    <i class="bi bi-filter me-1"></i>Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Custom Date Range -->
+                    <div class="col-auto filter-subgroup" id="custom-selection" style="display: {% if period_type == 'custom' %}flex{% else %}none{% endif %};">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <label for="start_date" class="form-label fw-bold">Start Date</label>
+                                <input type="date" id="start_date" name="start_date" class="form-control modern-input" value="{{ start_date|date:'Y-m-d' }}" placeholder="Start Date">
+                            </div>
+                            <div>
+                                <label for="end_date" class="form-label fw-bold">End Date</label>
+                                <input type="date" id="end_date" name="end_date" class="form-control modern-input" value="{{ end_date|date:'Y-m-d' }}" placeholder="End Date">
+                            </div>
+                            <div class="align-self-end">
+                                <button type="submit" class="btn btn-primary modern-btn">
+                                    <i class="bi bi-filter me-1"></i>Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts for Overdue and Upcoming Payments -->
+    {% if messages %}
+    <div class="px-3 px-md-4 mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if overdue_payments > 0 %}
+    <div class="px-3 px-md-4 mb-4">
+        <div class="alert alert-danger alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            You have <strong>{{ overdue_payments }}</strong> overdue payment(s) as of today ({{ today|date:"Y-m-d" }}).
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+    {% if upcoming_payments > 0 %}
+    <div class="px-3 px-md-4 mb-4">
+        <div class="alert alert-warning alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-bell-fill me-2"></i>
+            You have <strong>{{ upcoming_payments }}</strong> upcoming payment(s) due within the next 7 days. Next due date: {{ next_due_date|date:"Y-m-d" }}.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Selected Period Display -->
+    <div class="px-3 px-md-4 mb-4">
+        <div class="card shadow border-0 rounded-4 bg-white animate-card">
+            <div class="px-3 px-md-4 py-3 py-md-4">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-calendar me-2"></i>Selected Period: 
+                    {% if period_type == 'current_month' %}
+                        {{ start_date|date:"F Y" }}
+                    {% elif period_type == 'month' %}
+                        {{ start_date|date:"F Y" }}
+                    {% elif period_type == 'quarter' %}
+                        Q{{ selected_quarter }} {{ selected_year }}
+                    {% elif period_type == 'year' %}
+                        {{ selected_year }}
+                    {% else %}
+                        {{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }}
+                    {% endif %}
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Metrics -->
+    <div class="px-3 px-md-4 row g-4 mb-4 mb-md-5">
+        <!-- Active Students -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-lines-fill me-2"></i>Active Students
+                </h5>
+                <p class="display-6 mb-0">{{ active_students_count }}</p>
+            </div>
+        </div>
+        <!-- Active Employees -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-fill me-2"></i>Active Employees
+                </h5>
+                <p class="display-6 mb-0">{{ active_employees_count }}</p>
+            </div>
+        </div>
+        <!-- Total Revenue -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-cash-stack me-2"></i>Total Revenue
+                </h5>
+                <p class="display-6 mb-0">{{ total_revenue|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+        <!-- Total Expected Amount -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-wallet2 me-2"></i>Total Expected Amount
+                </h5>
+                <p class="display-6 mb-0">{{ total_expected_amount|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+        <!-- Total Expenses -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-currency-exchange me-2"></i>Total Expenses
+                </h5>
+                <p class="display-6 mb-0">{{ total_expenses|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+        <!-- Net Profit -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-calculator-fill me-2"></i>Net Profit
+                </h5>
+                <p class="display-6 mb-0 {% if net_profit < 0 %}text-danger{% else %}text-success{% endif %}">
+                    {{ net_profit|floatformat:2|intcomma }} RUB
+                </p>
+            </div>
+        </div>
+        <!-- Base Fees -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-cash-stack me-2"></i>Base Fees Expected
+                </h5>
+                <p class="display-6 mb-0">{{ total_base_fees|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+        <!-- Extra Class Fees -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-list-ul me-2"></i>Extra Class Fees Expected
+                </h5>
+                <p class="display-6 mb-0">{{ total_extra_class_fees|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+        <!-- Total Employee Payments -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 text-center animate-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-check-fill me-2"></i>Total Employee Payments
+                </h5>
+                <p class="display-6 mb-0">{{ total_employee_payments|floatformat:2|intcomma }} RUB</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Breakdown -->
+    <div class="px-3 px-md-4 row g-4 mb-4 mb-md-5">
+        <div class="col-12">
+            <div class="card shadow border-0 rounded-4 bg-white animate-card">
+                <div class="px-3 px-md-4 py-3 py-md-4">
+                    <h3 class="fw-bold mb-4">
+                        <i class="bi bi-pie-chart-fill me-2"></i>Expense Breakdown
+                    </h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-person-check-fill me-2"></i>Salaries
+                                </h5>
+                                <p class="display-6 mb-0">{{ salaries_expenses|floatformat:2|intcomma }} RUB</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-currency-exchange me-2"></i>Other Expenses
+                                </h5>
+                                <p class="display-6 mb-0">{{ other_expenses|floatformat:2|intcomma }} RUB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra Class Attendance Breakdown -->
+    <div class="card shadow border-0 rounded-4 bg-white animate-card mx-0">
+        <div class="px-3 px-md-4 py-3 py-md-4 d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-list-ul me-2"></i>Extra Class Attendance ({{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }})
+            </h3>
+            <a href="{% url 'kindergarten:extra_class_list' %}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-gear-fill me-2"></i>Manage Extra Classes
+            </a>
+        </div>
+        <div class="table-responsive px-3 px-md-4 pb-4">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-start">Student</th>
+                        <th scope="col">Extra Classes</th>
+                        <th scope="col">Base Fee (RUB)</th>
+                        <th scope="col">Extra Class Fee (RUB)</th>
+                        <th scope="col" class="rounded-end">Total Due (RUB)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in student_attendance %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'kindergarten:view_student' entry.student.student_id %}" class="text-decoration-none">
+                                {{ entry.student.first_name }} {{ entry.student.last_name }} ({{ entry.student.student_id }})
+                            </a>
+                        </td>
+                        <td>
+                            {% for detail in entry.attendance_details %}
+                                <span class="d-block">{{ detail.extra_class }}: {{ detail.total_sessions }}</span>
+                            {% empty %}
+                                <span class="text-muted">No sessions logged</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ entry.base_fee|floatformat:2|intcomma }} RUB</td>
+                        <td>{{ entry.total_extra_class_fee|floatformat:2|intcomma }} RUB</td>
+                        <td>{{ entry.total_due|floatformat:2|intcomma }} RUB</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-emoji-frown display-6 d-block mb-2"></i>
+                            No active students found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for Animations -->
+{% block extra_css %}
+<style>
+    .animate-card {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-alert {
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Filter Card Specific Styling */
+    .filter-card {
+        background: #ffffff !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Filter Subgroup */
+    .filter-subgroup {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Inputs and Buttons */
+    .modern-input {
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        min-width: 120px;
+    }
+    .modern-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+    }
+
+    .modern-btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    .modern-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+        .px-3.px-md-4 {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+        .row.g-3 {
+            gap: 1rem;
+        }
+        .filter-subgroup {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .modern-input, .modern-btn {
+            width: 100%;
+        }
+        .filter-card .card-body {
+            padding: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .px-3.px-md-4 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+<!-- JavaScript for Filter Form -->
+{% block extra_js %}
+<script>
+    function updateFilterVisibility() {
+        var periodType = document.getElementById('period_type').value;
+        console.log("Period Type Selected: ", periodType);
+
+        document.getElementById('month-selection').style.display = periodType === 'month' ? 'flex' : 'none';
+        document.getElementById('quarter-selection').style.display = periodType === 'quarter' ? 'flex' : 'none';
+        document.getElementById('year-selection').style.display = periodType === 'year' ? 'flex' : 'none';
+        document.getElementById('custom-selection').style.display = periodType === 'custom' ? 'flex' : 'none';
+    }
+
+    // Run on page load to set initial visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        updateFilterVisibility();
+    });
+
+    // Run on change of period type
+    document.getElementById('period_type').addEventListener('change', function() {
+        updateFilterVisibility();
+        // Submit the form only for 'current_month'
+        if (this.value === 'current_month') {
+            document.getElementById('period-filter-form').submit();
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

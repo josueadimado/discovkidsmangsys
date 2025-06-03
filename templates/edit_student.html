@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <div class="px-3 px-md-4 pt-4 pt-md-5">
+        <h2 class="fw-bold mb-5">
+            <i class="bi bi-pencil-fill me-2"></i>Edit Student: {{ student.first_name }} {{ student.last_name }}
+        </h2>
+        <div class="card shadow-sm border-0 rounded-4 mb-5 animate-card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="{{ form.student_id.id_for_label }}" class="form-label fw-bold">Student ID</label>
+                        {{ form.student_id }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.group.id_for_label }}" class="form-label fw-bold">Group</label>
+                        {{ form.group }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.father_name.id_for_label }}" class="form-label fw-bold">Father's Name</label>
+                        {{ form.father_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.mother_name.id_for_label }}" class="form-label fw-bold">Mother's Name</label>
+                        {{ form.mother_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.parent_contact.id_for_label }}" class="form-label fw-bold">Parent Contact</label>
+                        {{ form.parent_contact }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.parent_email.id_for_label }}" class="form-label fw-bold">Parent Email</label>
+                        {{ form.parent_email }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.date_of_admission.id_for_label }}" class="form-label fw-bold">Date of Admission</label>
+                        {{ form.date_of_admission }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.fee.id_for_label }}" class="form-label fw-bold">Fee (RUB)</label>
+                        {{ form.fee }}
+                    </div>
+                    <div class="col-md-12">
+                        <label for="{{ form.picture.id_for_label }}" class="form-label fw-bold">Picture</label>
+                        {{ form.picture }}
+                        {% if student.picture %}
+                            <p class="mt-2"><a href="{{ student.picture.url }}" target="_blank" class="text-decoration-none">View Current Picture</a></p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Extra Classes</label>
+                        <div class="row g-3">
+                            {% for checkbox in form.extra_classes %}
+                                <div class="col-md-4 form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label ms-2" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }} ({{ checkbox.choice_label.price }} RUB)</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Allergy Fields -->
+                    <div class="col-md-6">
+                        <label for="{{ form.has_allergy.id_for_label }}" class="form-label fw-bold">Has Allergy?</label>
+                        {{ form.has_allergy }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.allergy_details.id_for_label }}" class="form-label fw-bold">Allergy Details</label>
+                        {{ form.allergy_details }}
+                        <small class="text-muted">Required if the student has an allergy.</small>
+                    </div>
+                    <!-- New Date of Completion Field -->
+                    <div class="col-md-6">
+                        <label for="{{ form.date_of_completion.id_for_label }}" class="form-label fw-bold">Date of Completion</label>
+                        {{ form.date_of_completion }}
+                        <small class="text-muted">The date when the student will graduate (optional).</small>
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <a href="{% url 'kindergarten:student_list' %}" class="btn btn-lg btn-secondary me-3">Cancel</a>
+                    <button type="submit" class="btn btn-lg btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-5" style="color: var(--primary-color);">
+        <i class="bi bi-plus-circle-fill me-2"></i>Add Expense
+    </h2>
+
+    {% if not categories_exist %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        No expense categories found. Please add categories via the admin interface to proceed.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm border-0 rounded-4 p-5">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label for="{{ form.category.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Category</label>
+                    {{ form.category }}
+                    {% if not categories_exist %}
+                    <small class="text-muted">No categories available. Add some to select one.</small>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.description.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Description</label>
+                    {{ form.description }}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.amount.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Amount (RUB)</label>
+                    {{ form.amount }}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.date.id_for_label }}" class="form-label fw-bold" style="color: var(--primary-color);">Date</label>
+                    {{ form.date }}
+                </div>
+            </div>
+            <div class="text-end mt-4">
+                <a href="{% url 'kindergarten:expense_list' %}" class="btn btn-lg shadow-sm rounded me-3" style="background-color: var(--secondary-color); border-color: var(--secondary-color); color: var(--text-light);">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-lg shadow-sm rounded" style="background-color: var(--primary-color); border-color: var(--primary-color); color: var(--text-light);" {% if not categories_exist %}disabled{% endif %}>
+                    Add Expense
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

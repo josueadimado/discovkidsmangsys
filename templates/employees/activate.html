@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <!-- Header Section -->
+    <div class="px-3 py-3 text-start">
+        <h2 class="fw-bold mb-3 position-relative d-inline-block" style="color: #333;">
+            <i class="bi bi-toggle-on me-2"></i>Activate Employee: {{ employee.first_name }} {{ employee.last_name }}
+            <span class="header-underline"></span>
+        </h2>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="px-3 mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Activate Confirmation -->
+    <div class="px-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <p>Are you sure you want to activate the employee <strong>{{ employee.first_name }} {{ employee.last_name }} ({{ employee.employee_id }})</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success modern-btn">Yes, Activate</button>
+                    <a href="{% url 'kindergarten:employee_list' %}" class="btn btn-secondary modern-btn">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Animations */
+    .animate-alert {
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Header Underline */
+    .header-underline {
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        background: #ffffff !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Buttons */
+    .modern-btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    .modern-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+        .px-3 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .px-3 {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .btn {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}

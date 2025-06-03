@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-4 py-md-5 px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <div class="px-3 px-md-4">
+        <h2 class="fw-bold mb-5">
+            <i class="bi bi-trash-fill me-2"></i>Delete Extra Class: {{ extra_class.name }}
+        </h2>
+        <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+            <p>Are you sure you want to delete the extra class <strong>{{ extra_class.name }}</strong> with price <strong>{{ extra_class.price }} RUB</strong>?</p>
+            <p class="text-muted">This action cannot be undone, and this extra class will be removed from all students who are enrolled in it.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="text-end mt-4">
+                    <a href="{% url 'kindergarten:extra_class_list' %}" class="btn btn-lg btn-secondary me-3">Cancel</a>
+                    <button type="submit" class="btn btn-lg btn-danger">Delete Extra Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

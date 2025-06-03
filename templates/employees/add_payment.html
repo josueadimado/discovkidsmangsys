@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <!-- Header Section -->
+    <div class="px-3 py-3 text-start">
+        <h2 class="fw-bold mb-3 position-relative d-inline-block" style="color: #333;">
+            <i class="bi bi-cash me-2"></i>Add Salary and Bonus Payment
+            <span class="header-underline"></span>
+        </h2>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="px-3 mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Add Payment Form -->
+    <div class="px-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="employee" class="form-label fw-bold">Employee</label>
+                            <select id="employee" name="employee" class="form-select modern-input" required>
+                                <option value="">Select Employee</option>
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }} ({{ employee.employee_id }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salary_amount" class="form-label fw-bold">Salary Amount (RUB)</label>
+                            <input type="number" id="salary_amount" name="salary_amount" class="form-control modern-input" step="0.01" value="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bonus_amount" class="form-label fw-bold">Bonus Amount (RUB)</label>
+                            <input type="number" id="bonus_amount" name="bonus_amount" class="form-control modern-input" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date" class="form-label fw-bold">Date</label>
+                            <input type="date" id="date" name="date" class="form-control modern-input" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="status" class="form-label fw-bold">Status</label>
+                            <select id="status" name="status" class="form-select modern-input">
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary modern-btn">Add Payment</button>
+                        <a href="{% url 'kindergarten:employee_list' %}" class="btn btn-secondary modern-btn">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Animations */
+    .animate-alert {
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Header Underline */
+    .header-underline {
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        background: #ffffff !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Inputs and Buttons */
+    .modern-input {
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .modern-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+    }
+
+    .modern-btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    .modern-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+        .px-3 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .px-3 {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .btn {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}

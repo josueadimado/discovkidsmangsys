@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <!-- Header Section -->
+    <div class="px-3 py-3 text-start">
+        <h2 class="fw-bold mb-3 position-relative d-inline-block" style="color: #333;">
+            <i class="bi bi-person-fill me-2"></i>Edit Employee: {{ employee.first_name }} {{ employee.last_name }}
+            <span class="header-underline"></span>
+        </h2>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="px-3 mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Edit Employee Form -->
+    <div class="px-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="employee_type" class="form-label fw-bold">Employee Type</label>
+                            <select id="employee_type" name="employee_type" class="form-select modern-input" required>
+                                <option value="manager" {% if employee.employee_type == 'manager' %}selected{% endif %}>Manager</option>
+                                <option value="front_desk" {% if employee.employee_type == 'front_desk' %}selected{% endif %}>Front Desk Personnel</option>
+                                <option value="cleaner" {% if employee.employee_type == 'cleaner' %}selected{% endif %}>Cleaner</option>
+                                <option value="teacher" {% if employee.employee_type == 'teacher' %}selected{% endif %}>Teacher</option>
+                                <option value="gardener" {% if employee.employee_type == 'gardener' %}selected{% endif %}>Gardener</option>
+                                <option value="cook" {% if employee.employee_type == 'cook' %}selected{% endif %}>Cook</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label fw-bold">First Name</label>
+                            <input type="text" id="first_name" name="first_name" class="form-control modern-input" value="{{ employee.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label fw-bold">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" class="form-control modern-input" value="{{ employee.last_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date_joined" class="form-label fw-bold">Date Joined</label>
+                            <input type="date" id="date_joined" name="date_joined" class="form-control modern-input" value="{{ employee.date_joined|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact_number" class="form-label fw-bold">Contact Number</label>
+                            <input type="text" id="contact_number" name="contact_number" class="form-control modern-input" value="{{ employee.contact_number }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label fw-bold">Email</label>
+                            <input type="email" id="email" name="email" class="form-control modern-input" value="{{ employee.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salary" class="form-label fw-bold">Salary</label>
+                            <input type="number" id="salary" name="salary" class="form-control modern-input" step="0.01" value="{{ employee.salary }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bonus" class="form-label fw-bold">Bonus</label>
+                            <input type="number" id="bonus" name="bonus" class="form-control modern-input" step="0.01" value="{{ employee.bonus }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="photo" class="form-label fw-bold">Photo</label>
+                            <input type="file" id="photo" name="photo" class="form-control modern-input" accept="image/*">
+                            {% if employee.photo %}
+                            <small class="form-text text-muted">Current photo: <a href="{{ employee.photo.url }}" target="_blank">View</a></small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_document" class="form-label fw-bold">ID Document</label>
+                            <input type="file" id="id_document" name="id_document" class="form-control modern-input">
+                            {% if employee.id_document %}
+                            <small class="form-text text-muted">Current ID: <a href="{{ employee.id_document.url }}" target="_blank">View</a></small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="passport" class="form-label fw-bold">Passport</label>
+                            <input type="file" id="passport" name="passport" class="form-control modern-input">
+                            {% if employee.passport %}
+                            <small class="form-text text-muted">Current passport: <a href="{{ employee.passport.url }}" target="_blank">View</a></small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Additional Documents -->
+                    <div class="mt-4">
+                        <h5 class="fw-bold mb-3">Additional Documents</h5>
+                        {% if employee.documents.all %}
+                        <div class="mb-3">
+                            <h6>Existing Documents:</h6>
+                            <ul>
+                                {% for doc in employee.documents.all %}
+                                <li>{{ doc.title }}: <a href="{{ doc.file.url }}" target="_blank">View</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <div id="document-list">
+                            <div class="document-entry row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="document_title_0" class="form-label fw-bold">Document Title</label>
+                                    <input type="text" id="document_title_0" name="document_title" class="form-control modern-input">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="document_file_0" class="form-label fw-bold">Document File</label>
+                                    <input type="file" id="document_file_0" name="document_file" class="form-control modern-input">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary modern-btn" onclick="addDocumentField()">Add Another Document</button>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary modern-btn">Update Employee</button>
+                        <a href="{% url 'kindergarten:employee_list' %}" class="btn btn-secondary modern-btn">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addDocumentField() {
+    const documentList = document.getElementById('document-list');
+    const entryCount = documentList.getElementsByClassName('document-entry').length;
+    const newEntry = document.createElement('div');
+    newEntry.className = 'document-entry row g-3 mb-3';
+    newEntry.innerHTML = `
+        <div class="col-md-6">
+            <label for="document_title_${entryCount}" class="form-label fw-bold">Document Title</label>
+            <input type="text" id="document_title_${entryCount}" name="document_title" class="form-control modern-input">
+        </div>
+        <div class="col-md-6">
+            <label for="document_file_${entryCount}" class="form-label fw-bold">Document File</label>
+            <input type="file" id="document_file_${entryCount}" name="document_file" class="form-control modern-input">
+        </div>
+    `;
+    documentList.appendChild(newEntry);
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Animations */
+    .animate-alert {
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Header Underline */
+    .header-underline {
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        background: #ffffff !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Filter Card Specific Styling */
+    .filter-card {
+        background: #ffffff !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Inputs and Buttons */
+    .modern-input {
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .modern-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+    }
+
+    .modern-btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    .modern-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+        .px-3 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .px-3 {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .btn {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}

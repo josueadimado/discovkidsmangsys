@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Start of content block -->
+<div class="container-fluid login-container" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1rem;">
+    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-5 text-center">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </h2>
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show animate-alert" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Invalid username or password. Please try again.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-lg btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- End of content block -->
+
+<!-- Custom CSS for Enhanced Presentation -->
+{% block extra_css %}
+<style>
+    .animate-alert {
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Ensure visibility of the login container and form -->
+    .login-container {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .login-container .card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Style the form fields -->
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        font-weight: bold;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Adjustments -->
+    @media (max-width: 576px) {
+        .login-container {
+            padding: 1rem 0 !important;
+        }
+        .col-11 {
+            width: 90%;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}
