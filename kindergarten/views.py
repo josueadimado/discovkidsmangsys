@@ -15,7 +15,6 @@ from django.db.models.functions import TruncDay, TruncMonth, TruncQuarter, Trunc
 
 @login_required
 def dashboard(request):
-    # Current date and period
     today = timezone.now().date()
     current_month = today.month
     current_year = today.year
@@ -90,14 +89,16 @@ def dashboard(request):
             start_date = datetime(current_year, current_month, 1).date()
             end_date = (start_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
-    # Active students and employees (snapshot, not period-based)
+    # Generate dynamic year range (e.g., current year ± 5 years)
+    year_range = list(range(current_year - 5, current_year + 6))  # e.g., 2020 to 2030 for 2025
+
+    # Rest of the view logic (unchanged)...
     active_students = Student.objects.filter(is_active=True)
     for student in active_students:
         student.save()
     active_students_count = active_students.count()
     active_employees_count = Employee.objects.filter(is_active=True).count()
 
-    # Total expected amount (base fees + extra class fees) for the selected period
     total_base_fees = sum(student.fee for student in active_students)
     total_extra_class_fees = 0
     for student in active_students:
@@ -113,20 +114,17 @@ def dashboard(request):
             continue
     total_expected_amount = total_base_fees + total_extra_class_fees
 
-    # Total revenue from completed student payments in the selected period
     total_revenue = Payment.objects.filter(
         status='completed',
         date__gte=start_date,
         date__lte=end_date
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Total expenses in the selected period (including employee payments, recorded as expenses)
     total_expenses = Expense.objects.filter(
         date__gte=start_date,
         date__lte=end_date
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Breakdown of expenses: Salaries vs Other Expenses
     salaries_expenses = Expense.objects.filter(
         category__name='Salaries',
         date__gte=start_date,
@@ -134,17 +132,14 @@ def dashboard(request):
     ).aggregate(Sum('amount'))['amount__sum'] or 0
     other_expenses = total_expenses - salaries_expenses
 
-    # Total employee payments in the selected period
     total_employee_payments = EmployeePayment.objects.filter(
         status='completed',
         date__gte=start_date,
         date__lte=end_date
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Net profit (Total Revenue - Total Expenses) for the selected period
     net_profit = total_revenue - total_expenses
 
-    # Overdue and upcoming payments (adjust to consider the selected period)
     if today.day <= 25:
         next_due_date = today.replace(day=25)
     else:
@@ -162,7 +157,6 @@ def dashboard(request):
         status='pending'
     ).count()
 
-    # Extra class attendance breakdown for the selected period
     student_attendance = []
     for student in active_students:
         try:
@@ -217,6 +211,7 @@ def dashboard(request):
         'selected_quarter': selected_quarter,
         'start_date': start_date,
         'end_date': end_date,
+        'year_range': year_range,  # Added to context
     }
     return render(request, 'dashboard.html', context)
 
@@ -275,7 +270,7 @@ def admit_student(request):
     return render(request, 'admit_student.html', {'form': form})
 
 
-    
+
 @login_required
 def student_list(request):
     query = request.GET.get('q', '')

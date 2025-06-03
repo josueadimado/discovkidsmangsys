@@ -18,125 +18,126 @@
     </div>
 
     <!-- Period Filter Form -->
-    <div class="px-3 px-md-4 mb-4">
-        <div class="card filter-card">
-            <div class="card-body">
-                <h5 class="fw-bold mb-3">Select Period for Metrics</h5>
-                <form method="get" id="period-filter-form" class="row g-3 align-items-center">
-                    <!-- Period Type Selection -->
-                    <div class="col-auto">
-                        <label for="period_type" class="form-label fw-bold">Period Type</label>
-                        <select id="period_type" name="period_type" class="form-select modern-input">
-                            <option value="current_month" {% if period_type == 'current_month' %}selected{% endif %}>Current Month</option>
-                            <option value="month" {% if period_type == 'month' %}selected{% endif %}>Specific Month</option>
-                            <option value="quarter" {% if period_type == 'quarter' %}selected{% endif %}>Quarterly</option>
-                            <option value="year" {% if period_type == 'year' %}selected{% endif %}>Yearly</option>
-                            <option value="custom" {% if period_type == 'custom' %}selected{% endif %}>Custom Date Range</option>
-                        </select>
-                    </div>
-                    <!-- Specific Month Selection -->
-                    <div class="col-auto filter-subgroup" id="month-selection" style="display: {% if period_type == 'month' %}flex{% else %}none{% endif %};">
-                        <div class="d-flex align-items-center gap-2">
-                            <div>
-                                <label for="month" class="form-label fw-bold">Month</label>
-                                <select id="month" name="month" class="form-select modern-input">
-                                    {% for month_num in "1 2 3 4 5 6 7 8 9 10 11 12" %}
-                                    {% with month_num_int=month_num|add:"0" %}
-                                    <option value="{{ month_num_int }}" {% if selected_month == month_num_int|stringformat:"s" %}selected{% endif %}>
-                                        {{ month_num_int|stringformat:"02d" }}
-                                    </option>
-                                    {% endwith %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div>
-                                <label for="year_month" class="form-label fw-bold">Year</label>
-                                <select id="year_month" name="year" class="form-select modern-input">
-                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
-                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
-                                        {{ year }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="align-self-end">
-                                <button type="submit" class="btn btn-primary modern-btn">
-                                    <i class="bi bi-filter me-1"></i>Apply
-                                </button>
-                            </div>
+<!-- Period Filter Form -->
+<div class="px-3 px-md-4 mb-4">
+    <div class="card filter-card">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Select Period for Metrics</h5>
+            <form method="get" id="period-filter-form" class="row g-3 align-items-center">
+                <!-- Period Type Selection -->
+                <div class="col-auto">
+                    <label for="period_type" class="form-label fw-bold">Period Type</label>
+                    <select id="period_type" name="period_type" class="form-select modern-input">
+                        <option value="current_month" {% if period_type == 'current_month' %}selected{% endif %}>Current Month</option>
+                        <option value="month" {% if period_type == 'month' %}selected{% endif %}>Specific Month</option>
+                        <option value="quarter" {% if period_type == 'quarter' %}selected{% endif %}>Quarterly</option>
+                        <option value="year" {% if period_type == 'year' %}selected{% endif %}>Yearly</option>
+                        <option value="custom" {% if period_type == 'custom' %}selected{% endif %}>Custom Date Range</option>
+                    </select>
+                </div>
+                <!-- Specific Month Selection -->
+                <div class="col-auto filter-subgroup" id="month-selection" style="display: {% if period_type == 'month' %}flex{% else %}none{% endif %};">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <label for="month" class="form-label fw-bold">Month</label>
+                            <select id="month" name="month" class="form-select modern-input">
+                                {% for month_num in "1 2 3 4 5 6 7 8 9 10 11 12" %}
+                                {% with month_num_int=month_num|add:"0" %}
+                                <option value="{{ month_num_int }}" {% if selected_month == month_num_int|stringformat:"s" %}selected{% endif %}>
+                                    {{ month_num_int|stringformat:"02d" }}
+                                </option>
+                                {% endwith %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="year_month" class="form-label fw-bold">Year</label>
+                            <select id="year_month" name="year" class="form-select modern-input">
+                                {% for year in year_range %}
+                                <option value="{{ year }}" {% if selected_year|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="align-self-end">
+                            <button type="submit" class="btn btn-primary modern-btn">
+                                <i class="bi bi-filter me-1"></i>Apply
+                            </button>
                         </div>
                     </div>
-                    <!-- Quarterly Selection -->
-                    <div class="col-auto filter-subgroup" id="quarter-selection" style="display: {% if period_type == 'quarter' %}flex{% else %}none{% endif %};">
-                        <div class="d-flex align-items-center gap-2">
-                            <div>
-                                <label for="quarter" class="form-label fw-bold">Quarter</label>
-                                <select id="quarter" name="quarter" class="form-select modern-input">
-                                    <option value="1" {% if selected_quarter == '1' %}selected{% endif %}>Q1 (Jan-Mar)</option>
-                                    <option value="2" {% if selected_quarter == '2' %}selected{% endif %}>Q2 (Apr-Jun)</option>
-                                    <option value="3" {% if selected_quarter == '3' %}selected{% endif %}>Q3 (Jul-Sep)</option>
-                                    <option value="4" {% if selected_quarter == '4' %}selected{% endif %}>Q4 (Oct-Dec)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="year_quarter" class="form-label fw-bold">Year</label>
-                                <select id="year_quarter" name="year" class="form-select modern-input">
-                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
-                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
-                                        {{ year }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="align-self-end">
-                                <button type="submit" class="btn btn-primary modern-btn">
-                                    <i class="bi bi-filter me-1"></i>Apply
-                                </button>
-                            </div>
+                </div>
+                <!-- Quarterly Selection -->
+                <div class="col-auto filter-subgroup" id="quarter-selection" style="display: {% if period_type == 'quarter' %}flex{% else %}none{% endif %};">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <label for="quarter" class="form-label fw-bold">Quarter</label>
+                            <select id="quarter" name="quarter" class="form-select modern-input">
+                                <option value="1" {% if selected_quarter == '1' %}selected{% endif %}>Q1 (Jan-Mar)</option>
+                                <option value="2" {% if selected_quarter == '2' %}selected{% endif %}>Q2 (Apr-Jun)</option>
+                                <option value="3" {% if selected_quarter == '3' %}selected{% endif %}>Q3 (Jul-Sep)</option>
+                                <option value="4" {% if selected_quarter == '4' %}selected{% endif %}>Q4 (Oct-Dec)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="year_quarter" class="form-label fw-bold">Year</label>
+                            <select id="year_quarter" name="year" class="form-select modern-input">
+                                {% for year in year_range %}
+                                <option value="{{ year }}" {% if selected_year|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="align-self-end">
+                            <button type="submit" class="btn btn-primary modern-btn">
+                                <i class="bi bi-filter me-1"></i>Apply
+                            </button>
                         </div>
                     </div>
-                    <!-- Yearly Selection -->
-                    <div class="col-auto filter-subgroup" id="year-selection" style="display: {% if period_type == 'year' %}flex{% else %}none{% endif %};">
-                        <div class="d-flex align-items-center gap-2">
-                            <div>
-                                <label for="year" class="form-label fw-bold">Year</label>
-                                <select id="year" name="year" class="form-select modern-input">
-                                    {% for year in "2020 2021 2022 2023 2024 2025 2026" %}
-                                    <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>
-                                        {{ year }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="align-self-end">
-                                <button type="submit" class="btn btn-primary modern-btn">
-                                    <i class="bi bi-filter me-1"></i>Apply
-                                </button>
-                            </div>
+                </div>
+                <!-- Yearly Selection -->
+                <div class="col-auto filter-subgroup" id="year-selection" style="display: {% if period_type == 'year' %}flex{% else %}none{% endif %};">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <label for="year" class="form-label fw-bold">Year</label>
+                            <select id="year" name="year" class="form-select modern-input">
+                                {% for year in year_range %}
+                                <option value="{{ year }}" {% if selected_year|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="align-self-end">
+                            <button type="submit" class="btn btn-primary modern-btn">
+                                <i class="bi bi-filter me-1"></i>Apply
+                            </button>
                         </div>
                     </div>
-                    <!-- Custom Date Range -->
-                    <div class="col-auto filter-subgroup" id="custom-selection" style="display: {% if period_type == 'custom' %}flex{% else %}none{% endif %};">
-                        <div class="d-flex align-items-center gap-2">
-                            <div>
-                                <label for="start_date" class="form-label fw-bold">Start Date</label>
-                                <input type="date" id="start_date" name="start_date" class="form-control modern-input" value="{{ start_date|date:'Y-m-d' }}" placeholder="Start Date">
-                            </div>
-                            <div>
-                                <label for="end_date" class="form-label fw-bold">End Date</label>
-                                <input type="date" id="end_date" name="end_date" class="form-control modern-input" value="{{ end_date|date:'Y-m-d' }}" placeholder="End Date">
-                            </div>
-                            <div class="align-self-end">
-                                <button type="submit" class="btn btn-primary modern-btn">
-                                    <i class="bi bi-filter me-1"></i>Apply
-                                </button>
-                            </div>
+                </div>
+                <!-- Custom Date Range -->
+                <div class="col-auto filter-subgroup" id="custom-selection" style="display: {% if period_type == 'custom' %}flex{% else %}none{% endif %};">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <label for="start_date" class="form-label fw-bold">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control modern-input" value="{{ start_date|date:'Y-m-d' }}" placeholder="Start Date">
+                        </div>
+                        <div>
+                            <label for="end_date" class="form-label fw-bold">End Date</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control modern-input" value="{{ end_date|date:'Y-m-d' }}" placeholder="End Date">
+                        </div>
+                        <div class="align-self-end">
+                            <button type="submit" class="btn btn-primary modern-btn">
+                                <i class="bi bi-filter me-1"></i>Apply
+                            </button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Alerts for Overdue and Upcoming Payments -->
     {% if messages %}
