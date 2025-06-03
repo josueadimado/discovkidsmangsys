@@ -1,37 +1,67 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <!-- Start of content block -->
-<div class="container-fluid login-container" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1rem;">
-    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
-        <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
-            <h2 class="fw-bold mb-5 text-center">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Login
-            </h2>
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
-                    <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="login-page-wrapper">
+    <div class="login-container">
+        <div class="row justify-content-center align-items-center g-0 w-100 h-100">
+            <div class="col-12 col-sm-10 col-md-6 col-lg-4 col-xl-3">
+                <div class="login-card animate-card">
+                    <!-- Branding/Logo -->
+                    <div class="text-center mb-4">
+                        <h2 class="login-brand fw-bold">
+                            <i class="bi bi-book-fill me-2 text-primary"></i>Kindergarten System
+                        </h2>
+                    </div>
+
+                    <!-- Card Header -->
+                    <h4 class="fw-bold text-center mb-4 text-dark">
+                        Login
+                    </h4>
+
+                    <!-- Messages and Errors -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show animate-alert" role="alert">
+                            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show animate-alert" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Invalid username or password. Please try again.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Login Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-bold text-dark">
+                                <i class="bi bi-person-fill me-2"></i>Username
+                            </label>
+                            <input type="text" class="form-control login-input" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Enter your username" value="{{ form.username.value|default_if_none:'' }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ form.password.id_for_label }}" class="form-label fw-bold text-dark">
+                                <i class="bi bi-lock-fill me-2"></i>Password
+                            </label>
+                            <input type="password" class="form-control login-input" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" placeholder="Enter your password" required>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-block login-btn">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                {% endfor %}
             </div>
-            {% endif %}
-            {% if form.errors %}
-            <div class="alert alert-danger alert-dismissible fade show animate-alert" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Invalid username or password. Please try again.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="text-center mt-3">
-                    <button type="submit" class="btn btn-lg btn-primary">Login</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -40,49 +70,133 @@
 <!-- Custom CSS for Enhanced Presentation -->
 {% block extra_css %}
 <style>
+    /* Reset default margins and ensure full coverage */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Login Page Wrapper */
+    .login-page-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+        z-index: 1;
+    }
+
+    /* Login Container */
+    .login-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+
+    /* Ensure row and columns take full width */
+    .row {
+        width: 100%;
+        margin: 0 !important;
+    }
+
+    /* Login Card */
+    .login-card {
+        background: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .login-card:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Branding */
+    .login-brand {
+        font-size: 1.5rem;
+        color: #2c3e50;
+    }
+
+    /* Form Fields */
+    .login-input {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        background: #f9fafb;
+        transition: all 0.3s ease;
+    }
+
+    .login-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.1);
+    }
+
+    /* Login Button */
+    .login-btn {
+        background-color: #3b82f6;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .login-btn:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Alerts Animation */
     .animate-alert {
         animation: slideIn 0.5s ease-in-out;
     }
+
     @keyframes slideIn {
         0% { opacity: 0; transform: translateX(-20px); }
         100% { opacity: 1; transform: translateX(0); }
     }
 
-    /* Ensure visibility of the login container and form -->
-    .login-container {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    /* Card Animation */
+    .animate-card {
+        animation: fadeInUp 0.6s ease-in-out;
     }
 
-    .login-container .card {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* Style the form fields -->
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    .form-group label {
-        font-weight: bold;
-    }
-    .form-group input {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #e0e0e0;
-        border-radius: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    /* Responsive Adjustments -->
+    /* Responsive Adjustments */
     @media (max-width: 576px) {
-        .login-container {
-            padding: 1rem 0 !important;
+        .login-card {
+            padding: 1.5rem;
         }
-        .col-11 {
+        .login-brand {
+            font-size: 1.25rem;
+        }
+        .login-container {
+            padding: 1rem 0;
+        }
+        .col-12 {
             width: 90%;
+            margin: 0 auto;
         }
     }
 </style>
