@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Expense, ExpenseCategory, Student, ExtraClass, ExtraClassSession, Payment, Employee, Document
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import Expense, ExpenseCategory, Student, ExtraClass, ExtraClassSession, Payment, Employee, Document, User  # Import User from your models
 
 @admin.register(ExpenseCategory)
 class ExpenseCategoryAdmin(admin.ModelAdmin):
@@ -57,3 +58,31 @@ class EmployeeAdmin(admin.ModelAdmin):
     def full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
     full_name.short_description = 'Name'
+
+# Custom User Admin
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_active', 'date_joined')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'date_joined')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    date_hierarchy = 'date_joined'
+
+    # Prevent non-superusers from editing their own permissions
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if not request.user.is_superuser:
+            # Disable fields related to permissions and superuser status
+            form.base_fields['is_superuser'].disabled = True
+            form.base_fields['user_permissions'].disabled = True
+            form.base_fields['groups'].disabled = True
+        return form
+
+    # Prevent non-superusers from making themselves superusers
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser:
+            # If a non-superuser tries to edit a user, prevent changes to superuser status
+            if change and 'is_superuser' in form.changed_data:
+                obj.is_superuser = User.objects.get(pk=obj.pk).is_superuser
+        super().save_model(request, obj, form, change)
+
+# Register the custom user model (no need to unregister since it’s not registered by default)
+admin.site.register(User, CustomUserAdmin)
