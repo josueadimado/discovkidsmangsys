@@ -5,8 +5,8 @@ from . import views
 app_name = 'kindergarten'
 
 urlpatterns = [
-    path('', views.user_login, name='login'),  # Set login as the default URL
-    path('dashboard/', views.dashboard, name='dashboard'),  # Dedicated path for dashboard
+    path('', views.user_login, name='login'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('admit-student/', views.admit_student, name='admit_student'),
     path('students/', views.student_list, name='student_list'),
     path('view-student/<str:student_id>/', views.view_student, name='view_student'),
@@ -39,4 +39,6 @@ urlpatterns = [
     path('view-employee/<str:employee_id>/', views.view_employee, name='view_employee'),    
     path('print-employee-payment-history/<str:employee_id>/', views.print_employee_payment_history, name='print_employee_payment_history'),
     path('logout/', views.user_logout, name='logout'),
+    path('attendance/record/', views.record_attendance, name='record_attendance'),
+    path('attendance/history/', views.attendance_history, name='attendance_history'),
 ]

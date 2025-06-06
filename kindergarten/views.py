@@ -9,8 +9,8 @@ from django.core.paginator import Paginator
 import openpyxl
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .forms import StudentForm, ExtraClassForm, ExpenseForm, ExtraClassSessionForm, BulkExtraClassSessionForm
-from .models import ExtraClass, Payment, Student, Expense, ExtraClassSession, ExpenseCategory, Employee, Document, EmployeePayment
+from .forms import StudentForm, ExtraClassForm, ExpenseForm, ExtraClassSessionForm, BulkExtraClassSessionForm, BulkAttendanceForm
+from .models import ExtraClass, Payment, Student, Expense, ExtraClassSession, ExpenseCategory, Employee, Document, EmployeePayment,StudentAttendance
 from django.db.models.functions import TruncDay, TruncMonth, TruncQuarter, TruncYear
 
 @login_required
@@ -1124,3 +1124,74 @@ def print_employee_payment_history(request, employee_id):
 def view_employee(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
     return render(request, 'employees/view_employee.html', {'employee': employee})
+
+
+@login_required
+def record_attendance(request):
+    if request.method == 'POST':
+        students = Student.objects.filter(is_active=True)
+        form = BulkAttendanceForm(request.POST, students=students)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Attendance recorded successfully.")
+                return redirect('kindergarten:attendance_history')
+            except Exception as e:
+                messages.error(request, f"Error recording attendance: {e}")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        students = Student.objects.filter(is_active=True)
+        form = BulkAttendanceForm(students=students)
+
+    # Prepare student data with form fields for the template
+    student_data = []
+    for student in students:
+        student_data.append({
+            'student': student,
+            'present_field': form[f'is_present_{student.id}'],
+            'remarks_field': form[f'remarks_{student.id}'],
+        })
+
+    return render(request, 'attendance/record_attendance.html', {
+        'form': form,
+        'student_data': student_data,
+    })
+    
+
+@login_required
+def attendance_history(request):
+    date_filter = request.GET.get('date', '')
+    student_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
+    attendances = StudentAttendance.objects.all().select_related('student').order_by('-date')
+
+    if date_filter:
+        try:
+            date = timezone.datetime.strptime(date_filter, '%Y-%m-%d').date()
+            attendances = attendances.filter(date=date)
+        except ValueError:
+            messages.error(request, "Invalid date format. Use YYYY-MM-DD.")
+
+    if student_query:
+        attendances = attendances.filter(
+            Q(student__first_name__icontains=student_query) |
+            Q(student__last_name__icontains=student_query) |
+            Q(student__student_id__icontains=student_query)
+        )
+
+    if status_filter in ['present', 'absent']:
+        is_present = status_filter == 'present'
+        attendances = attendances.filter(is_present=is_present)
+
+    paginator = Paginator(attendances, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'attendance/attendance_history.html', {
+        'page_obj': page_obj,
+        'date_filter': date_filter,
+        'student_query': student_query,
+        'status_filter': status_filter,
+    })

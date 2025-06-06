@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Expense, ExpenseCategory, Student, ExtraClass, ExtraClassSession, Payment, Employee, Document, User  # Import User from your models
+from .models import Expense, ExpenseCategory, Student, ExtraClass, ExtraClassSession, Payment, Employee, Document, User, StudentAttendance
 
 @admin.register(ExpenseCategory)
 class ExpenseCategoryAdmin(admin.ModelAdmin):
@@ -43,7 +43,7 @@ class PaymentAdmin(admin.ModelAdmin):
 # Inline for Documents
 class DocumentInline(admin.TabularInline):
     model = Document
-    extra = 1  # Number of empty forms to display
+    extra = 1
     fields = ('title', 'file', 'uploaded_at')
     readonly_fields = ('uploaded_at',)
 
@@ -66,23 +66,32 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ('username', 'email', 'first_name', 'last_name')
     date_hierarchy = 'date_joined'
 
-    # Prevent non-superusers from editing their own permissions
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if not request.user.is_superuser:
-            # Disable fields related to permissions and superuser status
             form.base_fields['is_superuser'].disabled = True
             form.base_fields['user_permissions'].disabled = True
             form.base_fields['groups'].disabled = True
         return form
 
-    # Prevent non-superusers from making themselves superusers
     def save_model(self, request, obj, form, change):
         if not request.user.is_superuser:
-            # If a non-superuser tries to edit a user, prevent changes to superuser status
             if change and 'is_superuser' in form.changed_data:
                 obj.is_superuser = User.objects.get(pk=obj.pk).is_superuser
         super().save_model(request, obj, form, change)
 
-# Register the custom user model (no need to unregister since it’s not registered by default)
 admin.site.register(User, CustomUserAdmin)
+
+# Register StudentAttendance
+@admin.register(StudentAttendance)
+class StudentAttendanceAdmin(admin.ModelAdmin):
+    list_display = ('student', 'date', 'is_present', 'remarks_summary', 'recorded_at')
+    list_filter = ('is_present', 'date', 'recorded_at')
+    search_fields = ('student__student_id', 'student__first_name', 'student__last_name', 'remarks')
+    date_hierarchy = 'date'
+
+    def remarks_summary(self, obj):
+        if obj.remarks:
+            return obj.remarks[:50] + ('...' if len(obj.remarks) > 50 else '')
+        return '—'
+    remarks_summary.short_description = 'Remarks'

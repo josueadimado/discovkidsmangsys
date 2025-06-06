@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-4 py-md-5 px-0" style="background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); min-height: 100vh;">
+    <div class="px-3 px-md-4">
+        <h2 class="fw-bold mb-5">
+            <i class="bi bi-check-circle-fill me-2"></i>Record Daily Attendance
+        </h2>
+        <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 mb-5">
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">Date</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        <div class="text-danger">{{ form.date.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Present</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in student_data %}
+                            <tr>
+                                <td>{{ entry.student.first_name }} {{ entry.student.last_name }} ({{ entry.student.student_id }})</td>
+                                <td>
+                                    <div class="form-check">
+                                        {{ entry.present_field }}
+                                        <label class="form-check-label" for="{{ entry.present_field.id_for_label }}">Present</label>
+                                        {% if entry.present_field.errors %}
+                                            <div class="text-danger">{{ entry.present_field.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {{ entry.remarks_field }}
+                                    {% if entry.remarks_field.errors %}
+                                        <div class="text-danger">{{ entry.remarks_field.errors }}</div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No active students found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-4">
+                    <a href="{% url 'kindergarten:attendance_history' %}" class="btn btn-lg btn-secondary me-3">Cancel</a>
+                    <button type="submit" class="btn btn-lg btn-primary">Record Attendance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

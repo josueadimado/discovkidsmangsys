@@ -161,3 +161,17 @@ class EmployeePayment(models.Model):
 
     def __str__(self):
         return f"{self.payment_type.capitalize()} Payment for {self.employee} on {self.date}"
+
+
+class StudentAttendance(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
+    date = models.DateField(default=timezone.now)
+    is_present = models.BooleanField(default=True)
+    remarks = models.TextField(blank=True, null=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'date')  # Ensure one attendance record per student per day
+
+    def __str__(self):
+        return f"{self.student} - {self.date}: {'Present' if self.is_present else 'Absent'}"

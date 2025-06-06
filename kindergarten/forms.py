@@ -2,6 +2,8 @@ from django import forms
 from .models import Student, ExtraClass, Expense, ExpenseCategory, ExtraClassSession
 from datetime import datetime, timedelta
 from django.utils import timezone
+from .models import StudentAttendance
+
 
 class StudentForm(forms.ModelForm):
     class Meta:
@@ -120,3 +122,49 @@ class BulkExtraClassSessionForm(forms.Form):
                             defaults={'session_count': sessions_per_week}
                         )
                     current_date += timedelta(days=1)
+
+
+
+class StudentAttendanceForm(forms.ModelForm):
+    class Meta:
+        model = StudentAttendance
+        fields = ['is_present', 'remarks']
+        widgets = {
+            'is_present': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Optional remarks...'}),
+        }
+
+class BulkAttendanceForm(forms.Form):
+    date = forms.DateField(
+        initial=timezone.now,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'required'})
+    )
+
+    def __init__(self, *args, students=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.students = students
+        if students:
+            for student in students:
+                self.fields[f'is_present_{student.id}'] = forms.BooleanField(
+                    required=False,
+                    initial=True,
+                    widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+                )
+                self.fields[f'remarks_{student.id}'] = forms.CharField(
+                    required=False,
+                    widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Optional remarks...'})
+                )
+
+    def save(self):
+        date = self.cleaned_data['date']
+        for student in self.students:
+            is_present = self.cleaned_data.get(f'is_present_{student.id}', False)
+            remarks = self.cleaned_data.get(f'remarks_{student.id}', '')
+            StudentAttendance.objects.update_or_create(
+                student=student,
+                date=date,
+                defaults={
+                    'is_present': is_present,
+                    'remarks': remarks if remarks else None,
+                }
+            )
